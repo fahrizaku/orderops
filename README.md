@@ -44,12 +44,22 @@ docker compose up --build
 Try it:
 
 ```sh
+# 1. Register and log in (auth service)
 curl -X POST localhost:8081/register \
   -H 'Content-Type: application/json' \
   -d '{"name":"Ada","email":"ada@example.com","password":"supersecret","role":"customer"}'
-curl -X POST localhost:8081/login \
+TOKEN=$(curl -s -X POST localhost:8081/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"ada@example.com","password":"supersecret"}'
+  -d '{"email":"ada@example.com","password":"supersecret"}' | jq -r .token)
+
+# 2. Create an order (orders service) — this publishes an order.created
+#    event to RabbitMQ via the transactional outbox
+curl -X POST localhost:8082/orders \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"store_name":"Warung Sederhana","address":"Jl. Merdeka No. 1",
+       "items":[{"name":"Nasi Goreng","qty":2,"price":15000},
+                 {"name":"Es Teh","qty":1,"price":5000}],
+       "delivery_fee":7000}'
 ```
 
 ## Development
@@ -63,7 +73,8 @@ make run-auth    # run the auth service against that infrastructure
 ## Build stages
 
 1. **Foundation + auth service** — repo layout, Compose infra, CI, auth API ✅
-2. Orders service + RabbitMQ events
+2. **Orders service + RabbitMQ events** — orders CRUD, status lifecycle,
+   transactional outbox → `order.created` events ✅
 3. Notifications service + MongoDB audit + Redis
 4. Next.js web frontend
 5. Polish: diagrams, screenshots, demo pass

@@ -21,5 +21,20 @@ jobs:
       - run: go test ./...
       - run: go build ./...
 
+  orders:
+    name: orders service (Go)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/orders
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build ./...
+
   # Later stages add jobs here:
-  # orders (Go), notifications (Go), web (Next.js typecheck + test + build)
+  # notifications (Go), web (Next.js typecheck + test + build)

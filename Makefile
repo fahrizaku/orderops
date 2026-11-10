@@ -17,6 +17,7 @@ infra:
 # Unit tests for every Go service
 test:
 	cd services/auth && go test ./...
+	cd services/orders && go test ./...
 
 run-auth:
 	cd services/auth && go run ./cmd/auth
