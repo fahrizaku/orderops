@@ -1,4 +1,4 @@
-.PHONY: up down logs infra test run-auth
+.PHONY: up down logs infra test run-auth run-notifications
 
 # Start everything (infra + services) in Docker
 up:
@@ -18,6 +18,10 @@ infra:
 test:
 	cd services/auth && go test ./...
 	cd services/orders && go test ./...
+	cd services/notifications && go test ./...
 
 run-auth:
 	cd services/auth && go run ./cmd/auth
+
+run-notifications:
+	cd services/notifications && go run ./cmd/notifications

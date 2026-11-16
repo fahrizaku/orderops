@@ -60,6 +60,11 @@ curl -X POST localhost:8082/orders \
        "items":[{"name":"Nasi Goreng","qty":2,"price":15000},
                  {"name":"Es Teh","qty":1,"price":5000}],
        "delivery_fee":7000}'
+
+# 3. Read the audit log (notifications service) — the order.created event
+#    above, consumed from RabbitMQ and stored in MongoDB. Responses are
+#    cached in Redis for 30s and the endpoint is rate-limited.
+curl localhost:8083/audit
 ```
 
 ## Development
@@ -75,8 +80,8 @@ make run-auth    # run the auth service against that infrastructure
 1. **Foundation + auth service** — repo layout, Compose infra, CI, auth API ✅
 2. **Orders service + RabbitMQ events** — orders CRUD, status lifecycle,
    transactional outbox → `order.created` events ✅
-3. Notifications service + MongoDB audit + Redis
+3. **Notifications service + MongoDB audit + Redis** — consumes
+   `order.created` from RabbitMQ into an idempotent MongoDB audit log;
+   Redis cache + rate limiting on the read API ✅
 4. Next.js web frontend
 5. Polish: diagrams, screenshots, demo pass
-
-See `RENCANA.md` (Indonesian) for the full plan and stage log.

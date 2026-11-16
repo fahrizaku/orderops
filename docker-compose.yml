@@ -6,7 +6,9 @@ services:
       POSTGRES_PASSWORD: orderops
       POSTGRES_DB: orderops_auth
     ports:
-      - "5432:5432"
+      # Host port is 5433: many dev machines already run a local PostgreSQL
+      # on 5432. Services still reach Postgres at postgres:5432 internally.
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -87,6 +89,27 @@ services:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+
+  notifications:
+    build:
+      context: ./services/notifications
+    environment:
+      PORT: "8083"
+      RABBITMQ_URL: amqp://orderops:orderops@rabbitmq:5672/
+      MONGO_URL: mongodb://orderops:orderops@mongo:27017
+      MONGO_DB: orderops_notifications
+      REDIS_URL: redis://redis:6379
+      CACHE_TTL_SECONDS: "30"
+      RATE_LIMIT_PER_MINUTE: "120"
+    ports:
+      - "8083:8083"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:

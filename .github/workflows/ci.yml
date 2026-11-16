@@ -36,5 +36,20 @@ jobs:
       - run: go test ./...
       - run: go build ./...
 
+  notifications:
+    name: notifications service (Go)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/notifications
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build ./...
+
   # Later stages add jobs here:
-  # notifications (Go), web (Next.js typecheck + test + build)
+  # web (Next.js typecheck + test + build)
